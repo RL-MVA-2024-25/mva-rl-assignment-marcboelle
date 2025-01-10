@@ -44,35 +44,29 @@ class ProjectAgent:
         pass
 
 
-dqn_config = {
+config = {
     "n_layers":4,
     "hidden_dim":256
 }
 
 
 class DQN(ProjectAgent):
-    def __init__(self, config=dqn_config):
-        # Init config
+    def __init__(self, config=config):
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
         self.model = Network(env.observation_space.shape[0], env.action_space.n, config["n_layers"], config["hidden_dim"]).to(self.device)
 
         #Init means and stds
         self.state_mean = torch.tensor([3.6e5, 7.75e3, 287, 33, 36.8e3, 55], dtype=torch.float32).to(self.device)
         self.state_std = torch.tensor([1.28788e5, 1.4435e4, 345, 25, 70.083e3, 32], dtype=torch.float32).to(self.device)
-        
-        self.reward_mean = 4.5344e4
-        self.reward_std = 3.3407e4
 
     def normalize_state(self, state):
         out = (state - self.state_mean) / self.state_std
         return out
-    
-    def normalize_reward(self, reward):
-        return (reward - self.reward_mean) / self.reward_std
+
 
     def act(self, observation, use_random=False):
         observation = torch.tensor(observation, dtype=torch.float32).to(self.device)
-        observation = self.normalize_state(observation, self.state_mean, self.state_std).unsqueeze(0)
+        observation = self.normalize_state(observation).unsqueeze(0)
         with torch.no_grad():
             Q = self.model(observation)
             action = torch.argmax(Q).item()
