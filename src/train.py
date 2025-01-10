@@ -1,8 +1,6 @@
 from gymnasium.wrappers import TimeLimit
 import torch
 import torch.nn as nn
-import numpy as np
-from copy import deepcopy
 
 
 from env_hiv import HIVPatient
@@ -31,17 +29,6 @@ class Network(torch.nn.Module):
             x = layer(x)
         x = self.last_layer(x)
         return x
-    
-
-class ProjectAgent:
-    def act(self, observation, use_random=False):
-        return 0
-
-    def save(self, path):
-        pass
-
-    def load(self):
-        pass
 
 
 config = {
@@ -50,7 +37,7 @@ config = {
 }
 
 
-class DQN(ProjectAgent):
+class ProjectAgent:
     def __init__(self, config=config):
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
         self.model = Network(env.observation_space.shape[0], env.action_space.n, config["n_layers"], config["hidden_dim"]).to(self.device)
